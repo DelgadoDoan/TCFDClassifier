@@ -1,0 +1,17 @@
+{
+    "sklearn": {
+        "environment": [
+            "scikit-learn=1.6.1"
+        ],
+        "example_input": {
+            "data": [
+                ""
+            ]
+        },
+        "model": {
+            "file": "tcfd-bin-svc.pkl"
+        },
+        "model_format": "pickle",
+        "task": "text-classification"
+    }
+}

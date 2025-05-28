@@ -26,12 +26,11 @@ import { Textarea } from "@/components/ui/textarea"
 
 const FormSchema = z.object({
   prompt: z
-    .string(),
+    .string()
+    .min(1, { message: "" }),
   model: z
     .string()
-    .default("0")
 })
-
 
 export function InputField({
   setResult,
@@ -40,6 +39,10 @@ export function InputField({
 }) {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      prompt: "",
+      model: "0",
+    }
   })
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
@@ -51,24 +54,31 @@ export function InputField({
       },
       body: JSON.stringify(data),
     })
-      .then(async (response) => {
-        if (!response.ok) {
-          const error = await response.text()
-          throw new Error(error || "Something went wrong.")
-        }
-        return response.json()
-      })
-      .then((result) => {
-        setResult(result)
-      })
-      .catch((error) => {
-        console.error("Submission error:", error)
-      })
+    .then(async (response) => {
+      if (!response.ok) {
+        const error = await response.text()
+        throw new Error(error || "Something went wrong.")
+      }
+      return response.json()
+    })
+    .then((result) => {
+      setResult(result)
+    })
+    .catch((error) => {
+      console.error("Submission error:", error)
+    })
   }
-  
+
+  function onClear() {
+    form.reset({
+      prompt: "",
+      model: form.getValues("model"),
+    })
+    setResult(null) // optionally clear result
+  }
 
   return (
-    <div className="relative">
+    <div className="relative mb-10">
       <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>  
         <FormField
@@ -88,30 +98,38 @@ export function InputField({
           )}
         />
 
+        <div className="flex justify-end absolute gap-x-1 bottom-1 left-1">  
+          <Button
+            type="button"
+            className="hover:cursor-pointer"
+            onClick={onClear}
+          >
+            Clear
+          </Button>
+        </div>
+
         <div className="flex justify-end absolute gap-x-1 bottom-1 right-1">
           <FormField
             control={form.control}
             name="model"
             render={({ field }) => (
               <FormItem>
-              
               <Select onValueChange={field.onChange} defaultValue="0">
                 <FormControl>
-                  <SelectTrigger className="w-[120px]">
+                  <SelectTrigger className="hover:cursor-pointer">
                   <SelectValue/>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="0">TCFDBert</SelectItem>
-                  <SelectItem value="1">Model2</SelectItem>
+                  <SelectItem value="0">TCFD-BERT</SelectItem>
+                  <SelectItem value="1">Two-Layer SVC</SelectItem>
                 </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
             )}
-          />
-
-            <Button type="submit">^</Button>
+            />
+            <Button type="submit" className="hover:cursor-pointer">^</Button>
           </div>
         </form>
       </Form>
